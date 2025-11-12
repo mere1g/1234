@@ -1,0 +1,36 @@
+import csv
+from sqlalchemy.orm import Session
+import crud
+import schemas
+from database import SessionLocal
+
+
+def load_students_from_csv(filepath: str = "students.csv"):
+    db: Session = SessionLocal()
+    try:
+        with open(filepath, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                # Приводим имена колонок к нашим полям
+                student_in = schemas.StudentCreate(
+                    surname=row["Фамилия"],
+                    name=row["Имя"],
+                    patronymic=row.get("Отчество", None) or None,
+                    faculty=row["Факультет"],
+                    course=row["Курс"],
+                    group=row["Группа"],
+                    grade=float(row["Средний балл"].replace(",", ".")),
+                )
+                # Проверяем, нет ли уже такого
+                existing = (
+                    db.query(models.Student)
+                    .filter_by(surname=student_in.surname, name=student_in.name, faculty=student_in.faculty)
+                    .first()
+                )
+                if not existing:
+                    crud.create_student(db, student_in)
+        print("Данные из CSV успешно загружены!")
+    except Exception as e:
+        print(f"Ошибка при загрузке CSV: {e}")
+    finally:
+        db.close()
