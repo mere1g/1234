@@ -1,0 +1,22 @@
+from pydantic import BaseModel
+
+
+class StudentBase(BaseModel):
+    surname: str
+    name: str
+    patronymic: str | None = None
+    faculty: str
+    course: str
+    group: str
+    grade: float
+
+
+class StudentCreate(StudentBase):
+    pass
+
+
+class Student(StudentBase):
+    id: int
+
+    class Config:
+        from_attributes = True
