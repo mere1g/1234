@@ -1,0 +1,44 @@
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+import models
+import schemas
+
+
+# 1. Создание студента
+def create_student(db: Session, student: schemas.StudentCreate):
+    db_student = models.Student(**student.model_dump())
+    db.add(db_student)
+    db.commit()
+    db.refresh(db_student)
+    return db_student
+
+
+# 2. Все студенты
+def get_students(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Student).offset(skip).limit(limit).all()
+
+
+# 3. По факультету
+def get_students_by_faculty(db: Session, faculty: str):
+    return db.query(models.Student).filter(models.Student.faculty == faculty).all()
+
+
+# 4. Уникальные курсы
+def get_unique_courses(db: Session):
+    return db.query(models.Student.course).distinct().all()
+
+
+# 5. Средний балл по факультету
+def get_avg_grade_by_faculty(db: Session, faculty: str):
+    result = db.query(func.avg(models.Student.grade)).filter(models.Student.faculty == faculty).scalar()
+    return round(result, 2) if result else None
+
+
+# 6. * Студенты по курсу с оценкой < 30
+def get_low_grade_students_by_course(db: Session, course: str, threshold: float = 30.0):
+    return (
+        db.query(models.Student)
+        .filter(models.Student.course == course)
+        .filter(models.Student.grade < threshold)
+        .all()
+    )
