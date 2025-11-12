@@ -1,0 +1,15 @@
+from sqlalchemy import Column, Integer, String, Float
+from database import Base
+
+
+class Student(Base):
+    __tablename__ = "students"
+
+    id = Column(Integer, primary_key=True, index=True)
+    surname = Column(String, nullable=False)        # Фамилия
+    name = Column(String, nullable=False)           # Имя
+    patronymic = Column(String, nullable=True)      # Отчество
+    faculty = Column(String, nullable=False)        # Факультет
+    course = Column(String, nullable=False)         # Курс
+    group = Column(String, nullable=False)          # Группа
+    grade = Column(Float, nullable=False)           # Средний балл
